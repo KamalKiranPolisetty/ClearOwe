@@ -1,0 +1,41 @@
+{
+  "name": "ClearOwe",
+  "short_name": "ClearOwe",
+  "description": "Personal loan and interest tracker with offline support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "This Month Dues",
+      "url": "/?tab=this-month",
+      "description": "View and pay upcoming interest"
+    },
+    {
+      "name": "Add Loan",
+      "url": "/?tab=loans&action=add",
+      "description": "Record a new borrowed loan"
+    }
+  ]
+}

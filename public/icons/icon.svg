@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="clearoweGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#134e4a" />
+      <stop offset="100%" stop-color="#0d9488" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0d9488" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Background Squircle matching ClearOwe brand -->
+  <rect width="512" height="512" rx="128" fill="url(#clearoweGrad)" />
+
+  <!-- ClearOwe Signature Emblem -->
+  <g transform="translate(64, 64) scale(16)" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    {/* Owl silhouette with signature ear tufts and contoured body */}
+    <path
+      d="M4.5 5.2L7.6 7.6C9.2 7 14.8 7 16.4 7.6L19.5 5.2C21.2 8.8 21.4 15.2 18.2 19.2C15.2 22 8.8 22 5.8 19.2C2.6 15.2 2.8 8.8 4.5 5.2Z"
+      stroke-width="1.75"
+    />
+    {/* Brow line */}
+    <path
+      d="M5.5 8.2C8 9.3 11 9.3 12 11.2C13 9.3 16 9.3 18.5 8.2"
+      stroke-width="1.5"
+    />
+    {/* Left eye */}
+    <circle cx="8.5" cy="12.2" r="2.8" stroke-width="1.5" />
+    <circle cx="8.5" cy="12.2" r="1.25" fill="#ffffff" stroke="none" />
+    {/* Right eye */}
+    <circle cx="15.5" cy="12.2" r="2.8" stroke-width="1.5" />
+    <circle cx="15.5" cy="12.2" r="1.25" fill="#ffffff" stroke="none" />
+    {/* Beak */}
+    <path d="M12 12.2L11.2 14.5C11.5 15 12.5 15 12.8 14.5L12 12.2Z" fill="#ffffff" stroke="none" />
+  </g>
+</svg>

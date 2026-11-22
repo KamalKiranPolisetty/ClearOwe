@@ -1,0 +1,590 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root, html, body {
+  color-scheme: light only;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+:root {
+  --bottom-nav-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  --background: 0 0% 100%;
+  --foreground: 222 47% 8%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 8%;
+
+  /* Midnight + Teal — ClearOwe Default */
+  --primary: 215 40% 22%;
+  --primary-foreground: 0 0% 100%;
+  --primary2: 173 58% 42%;
+
+  --secondary: 210 17% 96%;
+  --secondary-foreground: 222 47% 15%;
+
+  --muted: 210 17% 96%;
+  --muted-foreground: 215 16% 47%;
+
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 215 40% 22%;
+
+  --app-radius: 20px;
+  --sidebar-active-bg: hsl(var(--primary) / 0.10);
+  --sidebar-active-color: hsl(var(--primary));
+  --logo-gradient: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary2)));
+}
+
+html {
+  min-height: 100vh;
+  min-height: 100dvh;
+  --bg-g1: hsl(215, 22%, 94%);
+  --bg-g2: hsl(173, 20%, 93%);
+  --bg-g3: hsl(215, 18%, 95%);
+  --bg-g4: hsl(173, 22%, 94%);
+  background: linear-gradient(160deg, var(--bg-g1) 0%, var(--bg-g2) 35%, var(--bg-g3) 65%, var(--bg-g4) 100%);
+  background-attachment: fixed;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  color: #0c1a2e;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: transparent;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Background checks pattern matching SimpleSpend */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-attachment: fixed;
+  opacity: 1;
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.055) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* ClearOwe Frosted Glass Card Styling matching SimpleSpend */
+.glass-card,
+.app-card {
+  background: rgba(255, 255, 255, 0.68) !important;
+  backdrop-filter: blur(28px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.75) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: var(--app-radius, 20px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+    0 4px 20px rgba(80, 60, 180, 0.06),
+    0 16px 48px rgba(80, 60, 180, 0.08) !important;
+  padding: 20px 24px;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    0 8px 30px rgba(80, 60, 180, 0.09),
+    0 24px 60px rgba(80, 60, 180, 0.09) !important;
+}
+
+/* Sidebar Desktop Glass matching SimpleSpend */
+.sidebar-desktop {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(28px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 4px 0 32px rgba(80, 60, 180, 0.06) !important;
+}
+
+/* ClearOwe Insight Card */
+.insight-card {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.06) 0%, rgba(255, 255, 255, 0.8) 100%);
+  border: 1px solid hsl(var(--primary) / 0.15);
+  border-radius: 14px;
+  padding: 14px 18px;
+}
+
+/* Responsive display helpers */
+@media (max-width: 640px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .page-wrapper {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
+    width: 100%;
+  }
+  .page-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100%;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-only {
+    display: none !important;
+  }
+
+  .page-wrapper {
+    margin-left: 220px !important;
+    transition: margin-left 200ms ease;
+  }
+  [data-sidebar="collapsed"] .page-wrapper {
+    margin-left: 72px !important;
+  }
+  .page-content {
+    padding: 24px 20px 80px !important;
+    max-width: 1100px !important;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Hide desktop checks background on mobile */
+  body::after {
+    display: none !important;
+  }
+
+  /* Hide Next.js dev overlay badge on mobile so it doesn't obstruct navigation */
+  nextjs-portal {
+    display: none !important;
+  }
+
+  html {
+    background-color: color-mix(in srgb, white 14%, hsl(var(--primary))) !important;
+    background-image: linear-gradient(to bottom, hsl(var(--primary)) 50%, #f4f6fb 50%) !important;
+    background-repeat: no-repeat !important;
+  }
+
+  body {
+    background:
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 55%),
+      linear-gradient(to bottom, hsl(var(--primary)) 0%, hsl(var(--primary2)) 55%, #f4f6fb 55%) !important;
+    background-attachment: fixed !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+  }
+
+  /* Mobile hero banner: transparent — body gradient shows through seamlessly */
+  .mobile-hero {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: calc(24px + env(safe-area-inset-top, 20px)) 18px 20px !important;
+    margin: 0 !important;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Mobile content sheet sits right below hero with 28px rounded corners */
+  .mobile-page-content,
+  .mobile-sheet,
+  .mobile-content-sheet {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background-color: #f4f6fb !important;
+    background-image:
+      linear-gradient(rgba(15, 23, 42, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.055) 1px, transparent 1px) !important;
+    background-size: 32px 32px !important;
+    background-repeat: repeat !important;
+    border-radius: 28px 28px 0 0 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+    padding: 20px 16px calc(var(--bottom-nav-height, 64px) + 36px) !important;
+    margin-top: 0 !important;
+    position: relative;
+    z-index: 2;
+    min-height: calc(100dvh - 180px) !important;
+  }
+
+  .glass-card,
+  .app-card {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1px solid #f1f5f9 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+    padding: 16px 18px !important;
+  }
+
+  .loan-card {
+    padding: 0 !important;
+  }
+
+  /* Compact responsive modal styling for mobile */
+  .modal-overlay {
+    padding: 12px !important;
+  }
+  .modal-card {
+    border-radius: 18px !important;
+    max-height: calc(100dvh - 24px) !important;
+  }
+  .modal-card-header {
+    padding: 16px 18px 12px !important;
+  }
+  .modal-card-body {
+    padding: 14px 16px 20px !important;
+  }
+  .modal-form-grid-2col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+}
+
+/* Mobile Tab Active Line with animation */
+@keyframes nav-pill-fade {
+  from {
+    opacity: 0;
+    transform: scaleX(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.mobile-tab-active-line {
+  position: absolute;
+  bottom: 2px;
+  width: 22px;
+  height: 3px;
+  border-radius: 1.5px;
+  background-color: hsl(var(--primary));
+  box-shadow: 0 1px 6px hsl(var(--primary) / 0.40);
+  animation: nav-pill-fade 185ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tabular nums */
+.font-numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Shimmer animation for Skeletons matching SimpleSpend */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Universal Tab Skeleton Switching ──
+/* ── Universal Tab Skeleton Switching ──
+   Driven exclusively by html[data-tab="..."] set synchronously in <head> before first paint!
+   Guarantees 0ms correct skeleton paint on reload for #loans, #this-month, #settings! */
+.tab-skeleton {
+  display: none !important;
+}
+
+html[data-tab="home"] .tab-skeleton-home,
+html:not([data-tab]) .tab-skeleton-home {
+  display: block !important;
+}
+
+html[data-tab="loans"] .tab-skeleton-loans {
+  display: block !important;
+}
+html[data-tab="loans"] .tab-skeleton-home {
+  display: none !important;
+}
+
+html[data-tab="this-month"] .tab-skeleton-this-month {
+  display: block !important;
+}
+html[data-tab="this-month"] .tab-skeleton-home {
+  display: none !important;
+}
+
+html[data-tab="settings"] .tab-skeleton-settings {
+  display: block !important;
+}
+html[data-tab="settings"] .tab-skeleton-home {
+  display: none !important;
+}
+
+/* ── Desktop Sidebar Active Tab Styling ── */
+.sidebar-tab-btn {
+  background-color: transparent;
+  color: #64748b;
+  font-weight: 500;
+  transform: scale(1);
+}
+.sidebar-tab-btn:hover {
+  background-color: var(--sidebar-active-bg);
+  color: hsl(var(--primary));
+}
+.sidebar-tab-indicator {
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 4px;
+  border-radius: 0 4px 4px 0;
+  background-color: var(--sidebar-active-color);
+  display: none;
+}
+.sidebar-tab-btn.is-active {
+  background-color: var(--sidebar-active-bg);
+  color: var(--sidebar-active-color);
+  font-weight: 700;
+  transform: scale(1.02);
+}
+.sidebar-tab-btn.is-active .sidebar-tab-indicator {
+  display: block;
+}
+.sidebar-tab-btn.is-active .sidebar-tab-label {
+  margin-left: 4px;
+}
+
+/* Pre-hydration sync driven by html[data-tab] on desktop */
+html[data-tab="this-month"] .sidebar-tab-home {
+  background-color: transparent !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  transform: scale(1) !important;
+}
+html[data-tab="this-month"] .sidebar-tab-home .sidebar-tab-indicator {
+  display: none !important;
+}
+html[data-tab="this-month"] .sidebar-tab-home .sidebar-tab-label {
+  margin-left: 0 !important;
+}
+html[data-tab="this-month"] .sidebar-tab-this-month {
+  background-color: var(--sidebar-active-bg) !important;
+  color: var(--sidebar-active-color) !important;
+  font-weight: 700 !important;
+  transform: scale(1.02) !important;
+}
+html[data-tab="this-month"] .sidebar-tab-this-month .sidebar-tab-indicator {
+  display: block !important;
+}
+html[data-tab="this-month"] .sidebar-tab-this-month .sidebar-tab-label {
+  margin-left: 4px !important;
+}
+
+html[data-tab="loans"] .sidebar-tab-home {
+  background-color: transparent !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  transform: scale(1) !important;
+}
+html[data-tab="loans"] .sidebar-tab-home .sidebar-tab-indicator {
+  display: none !important;
+}
+html[data-tab="loans"] .sidebar-tab-home .sidebar-tab-label {
+  margin-left: 0 !important;
+}
+html[data-tab="loans"] .sidebar-tab-loans {
+  background-color: var(--sidebar-active-bg) !important;
+  color: var(--sidebar-active-color) !important;
+  font-weight: 700 !important;
+  transform: scale(1.02) !important;
+}
+html[data-tab="loans"] .sidebar-tab-loans .sidebar-tab-indicator {
+  display: block !important;
+}
+html[data-tab="loans"] .sidebar-tab-loans .sidebar-tab-label {
+  margin-left: 4px !important;
+}
+
+html[data-tab="settings"] .sidebar-tab-home {
+  background-color: transparent !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  transform: scale(1) !important;
+}
+html[data-tab="settings"] .sidebar-tab-home .sidebar-tab-indicator {
+  display: none !important;
+}
+html[data-tab="settings"] .sidebar-tab-home .sidebar-tab-label {
+  margin-left: 0 !important;
+}
+html[data-tab="settings"] .sidebar-tab-settings {
+  background-color: var(--sidebar-active-bg) !important;
+  color: var(--sidebar-active-color) !important;
+  font-weight: 700 !important;
+  transform: scale(1.02) !important;
+}
+html[data-tab="settings"] .sidebar-tab-settings .sidebar-tab-indicator {
+  display: block !important;
+}
+html[data-tab="settings"] .sidebar-tab-settings .sidebar-tab-label {
+  margin-left: 4px !important;
+}
+
+/* ── Mobile Bottom Navigation Bar Active State ── */
+.mobile-bottom-bar .mobile-tab-btn {
+  color: #94a3b8;
+  transform: scale(1);
+}
+.mobile-bottom-bar .mobile-tab-btn span {
+  font-weight: 500;
+  color: #94a3b8;
+}
+.mobile-bottom-bar .mobile-tab-btn.is-active {
+  color: hsl(var(--primary));
+  transform: scale(1.05);
+}
+.mobile-bottom-bar .mobile-tab-btn.is-active span {
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+.mobile-bottom-bar .mobile-tab-active-line {
+  display: none;
+}
+.mobile-bottom-bar .mobile-tab-btn.is-active .mobile-tab-active-line {
+  display: block;
+}
+
+/* Bottom nav active state matching html[data-tab] before hydration */
+html[data-tab="home"] .mobile-bottom-bar .mobile-tab-home .mobile-tab-active-line,
+html:not([data-tab]) .mobile-bottom-bar .mobile-tab-home .mobile-tab-active-line,
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-this-month .mobile-tab-active-line,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-loans .mobile-tab-active-line,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-settings .mobile-tab-active-line {
+  display: block !important;
+}
+
+html[data-tab="home"] .mobile-bottom-bar .mobile-tab-home,
+html:not([data-tab]) .mobile-bottom-bar .mobile-tab-home,
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-this-month,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-loans,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-settings {
+  color: hsl(var(--primary)) !important;
+  transform: scale(1.05) !important;
+}
+
+html[data-tab="home"] .mobile-bottom-bar .mobile-tab-home span,
+html:not([data-tab]) .mobile-bottom-bar .mobile-tab-home span,
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-this-month span,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-loans span,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-settings span {
+  font-weight: 700 !important;
+  color: hsl(var(--primary)) !important;
+}
+
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-home,
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-loans,
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-settings,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-home,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-this-month,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-settings,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-home,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-this-month,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-loans {
+  color: #94a3b8 !important;
+  transform: scale(1) !important;
+}
+
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-home span,
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-loans span,
+html[data-tab="this-month"] .mobile-bottom-bar .mobile-tab-settings span,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-home span,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-this-month span,
+html[data-tab="loans"] .mobile-bottom-bar .mobile-tab-settings span,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-home span,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-this-month span,
+html[data-tab="settings"] .mobile-bottom-bar .mobile-tab-loans span {
+  font-weight: 500 !important;
+  color: #94a3b8 !important;
+}
+
+/* Loan Card Component Styles matching the reference layout */
+.loan-card-content {
+  padding: 24px;
+}
+
+.loan-terms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.loan-terms-grid-no-interest {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.loan-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loan-expanded-content {
+  border-top: 1px solid #f1f5f9;
+  padding: 22px 24px;
+}
+
+.loan-payoff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+@media (max-width: 640px) {
+  .loan-card-content {
+    padding: 18px 16px 18px !important;
+  }
+
+  .loan-terms-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px 14px !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .loan-term-due {
+    grid-column: span 2 !important;
+  }
+
+  .loan-actions-row {
+    gap: 8px !important;
+  }
+
+  .loan-expanded-content {
+    padding: 16px 16px 20px !important;
+  }
+
+  .loan-payoff-grid {
+    gap: 14px 16px !important;
+    margin-bottom: 18px !important;
+    padding-bottom: 16px !important;
+  }
+}
+
