@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Loan, LoanWithStatus, Payment } from "@/types";
 import { formatCurrency } from "@/lib/currency";
+import { getEffectiveAnnualRate } from "@/lib/calculations";
 import { CurrencyToggle } from "@/components/CurrencyToggle";
 import { LoanCard } from "@/components/LoanCard";
 import {
@@ -12,7 +13,29 @@ import {
   Search,
   ChevronDown,
   ChevronUp,
+  ArrowUpDown,
+  Check,
+  X,
 } from "lucide-react";
+
+export type LoanSortOption =
+  | "name_asc"
+  | "name_desc"
+  | "balance_desc"
+  | "balance_asc"
+  | "rate_desc"
+  | "newest"
+  | "oldest";
+
+const SORT_OPTIONS: { id: LoanSortOption; label: string; shortLabel: string }[] = [
+  { id: "balance_desc", label: "Highest Balance", shortLabel: "Balance ↓" },
+  { id: "balance_asc", label: "Lowest Balance (Snowball)", shortLabel: "Balance ↑" },
+  { id: "name_asc", label: "Lender: A → Z", shortLabel: "Name A–Z" },
+  { id: "name_desc", label: "Lender: Z → A", shortLabel: "Name Z–A" },
+  { id: "rate_desc", label: "Highest Interest Rate", shortLabel: "Rate ↓" },
+  { id: "newest", label: "Newest Added", shortLabel: "Newest" },
+  { id: "oldest", label: "Oldest Added", shortLabel: "Oldest" },
+];
 
 interface LoansViewProps {
   loans: LoanWithStatus[];
@@ -44,6 +67,38 @@ export function LoansView({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusTab, setStatusTab] = useState<"active" | "completed" | "all">(initialStatusTab || "active");
   const [isAllCollapsed, setIsAllCollapsed] = useState<boolean | undefined>(undefined);
+  const [sortBy, setSortBy] = useState<LoanSortOption>("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  // Load saved sort preference
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("clearowe_loans_sort") as LoanSortOption;
+      if (saved && SORT_OPTIONS.some((o) => o.id === saved)) {
+        setSortBy(saved);
+      }
+    } catch {}
+  }, []);
+
+  // Close sort menu on click outside
+  useEffect(() => {
+    if (!isSortOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsSortOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isSortOpen]);
 
   useEffect(() => {
     if (initialStatusTab) {
@@ -68,8 +123,36 @@ export function LoansView({
       ? completedLoans
       : currencyLoans;
 
-  // Apply search filter to current tab loans
-  const displayedLoans = currentTabLoans.filter((l) => {
+  // Apply stable sorting: Pinned loans always remain first, then sorted by chosen strategy
+  const sortedLoans = [...currentTabLoans].sort((a, b) => {
+    if (a.is_pinned !== b.is_pinned) {
+      return a.is_pinned ? -1 : 1;
+    }
+
+    switch (sortBy) {
+      case "name_asc":
+        return a.lender_name.localeCompare(b.lender_name, undefined, { sensitivity: "base" });
+      case "name_desc":
+        return b.lender_name.localeCompare(a.lender_name, undefined, { sensitivity: "base" });
+      case "balance_desc":
+        return Number(b.remaining_principal || 0) - Number(a.remaining_principal || 0);
+      case "balance_asc":
+        return Number(a.remaining_principal || 0) - Number(b.remaining_principal || 0);
+      case "rate_desc": {
+        const rateA = getEffectiveAnnualRate(a.remaining_principal, a.interest_type, a.interest_rate);
+        const rateB = getEffectiveAnnualRate(b.remaining_principal, b.interest_type, b.interest_rate);
+        return rateB - rateA;
+      }
+      case "oldest":
+        return new Date(a.created_at || a.start_date || 0).getTime() - new Date(b.created_at || b.start_date || 0).getTime();
+      case "newest":
+      default:
+        return new Date(b.created_at || b.start_date || 0).getTime() - new Date(a.created_at || a.start_date || 0).getTime();
+    }
+  });
+
+  // Apply search filter to sorted loans
+  const displayedLoans = sortedLoans.filter((l) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -332,34 +415,179 @@ export function LoansView({
         )}
       </div>
 
-      {/* ── Search Bar: clean, borderless floating pill without clunky double cards ── */}
-      <div style={{ position: "relative", width: "100%", marginBottom: 16 }}>
-        <Search
-          size={16}
-          color="#94a3b8"
-          style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}
-        />
-        <input
-          type="text"
-          placeholder="Search loans or notes..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: "100%",
-            height: 42,
-            borderRadius: 12,
-            border: "1px solid #e2e8f0",
-            paddingLeft: 38,
-            paddingRight: 14,
-            fontSize: 13.5,
-            color: "#0f172a",
-            outline: "none",
-            backgroundColor: "#ffffff",
-            fontFamily: "inherit",
-            boxSizing: "border-box",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-          }}
-        />
+      {/* ── Search Bar & Custom Sort Dropdown ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", marginBottom: 16 }}>
+        {/* Search input with clean magnifying glass icon & clear button */}
+        <div style={{ position: "relative", flex: 1 }}>
+          <Search
+            size={16}
+            color="#94a3b8"
+            style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }}
+          />
+          <input
+            type="text"
+            placeholder="Search loans or notes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: "100%",
+              height: 42,
+              borderRadius: 12,
+              border: "1px solid #e2e8f0",
+              paddingLeft: 38,
+              paddingRight: searchQuery ? 34 : 14,
+              fontSize: 13.5,
+              color: "#0f172a",
+              outline: "none",
+              backgroundColor: "#ffffff",
+              fontFamily: "inherit",
+              boxSizing: "border-box",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+            }}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+              style={{
+                position: "absolute",
+                right: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: 22,
+                height: 22,
+                borderRadius: 100,
+                backgroundColor: "#f1f5f9",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "#64748b",
+              }}
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
+
+        {/* Custom Sort UI Dropdown */}
+        <div style={{ position: "relative" }} ref={sortRef}>
+          <button
+            type="button"
+            onClick={() => setIsSortOpen(!isSortOpen)}
+            style={{
+              height: 42,
+              padding: "0 13px",
+              borderRadius: 12,
+              border: "1px solid #e2e8f0",
+              backgroundColor: isSortOpen ? "#f8fafc" : "#ffffff",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#0f172a",
+              cursor: "pointer",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              whiteSpace: "nowrap",
+              fontFamily: "inherit",
+              transition: "all 150ms",
+            }}
+            aria-haspopup="listbox"
+            aria-expanded={isSortOpen}
+          >
+            <ArrowUpDown size={14} color="#64748b" />
+            <span className="desktop-only" style={{ color: "#64748b", fontWeight: 500 }}>Sort:</span>
+            <span style={{ fontWeight: 700 }}>
+              {SORT_OPTIONS.find((o) => o.id === sortBy)?.shortLabel || "Sort"}
+            </span>
+            <ChevronDown
+              size={13}
+              color="#94a3b8"
+              style={{
+                transform: isSortOpen ? "rotate(180deg)" : "none",
+                transition: "transform 150ms",
+              }}
+            />
+          </button>
+
+          {/* Floating Custom Sort Menu */}
+          {isSortOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 6px)",
+                right: 0,
+                width: 215,
+                backgroundColor: "#ffffff",
+                borderRadius: 14,
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 14px 34px -4px rgba(15, 23, 42, 0.16), 0 2px 6px rgba(15, 23, 42, 0.05)",
+                padding: "6px",
+                zIndex: 100,
+                animation: "fadeIn 120ms ease forwards",
+              }}
+            >
+              <div
+                style={{
+                  padding: "6px 10px 4px",
+                  fontSize: 10.5,
+                  fontWeight: 700,
+                  color: "#94a3b8",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.6px",
+                }}
+              >
+                Sort Loans
+              </div>
+
+              {SORT_OPTIONS.map((opt) => {
+                const isSelected = sortBy === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => {
+                      setSortBy(opt.id);
+                      setIsSortOpen(false);
+                      try {
+                        localStorage.setItem("clearowe_loans_sort", opt.id);
+                      } catch {}
+                    }}
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "8px 10px",
+                      borderRadius: 9,
+                      border: "none",
+                      backgroundColor: isSelected ? "hsl(var(--primary) / 0.08)" : "transparent",
+                      color: isSelected ? "hsl(var(--primary))" : "#334155",
+                      fontSize: 13,
+                      fontWeight: isSelected ? 700 : 500,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      fontFamily: "inherit",
+                      transition: "background 120ms",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = "#f1f5f9";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = "transparent";
+                    }}
+                  >
+                    <span>{opt.label}</span>
+                    {isSelected && <Check size={14} strokeWidth={2.5} color="hsl(var(--primary))" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── List Header: Count & Collapse All Toggle ── */}
